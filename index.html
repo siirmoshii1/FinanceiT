@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>FinanceiT — Your Money. Your Control.</title>
+  <meta name="description" content="A private, mobile-first personal finance tracker with offline storage, salary scheduling, budget planning, and iOS-native aesthetics." />
+  
+  <!-- PWA & Apple Meta Tags -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FinanceiT" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app-root">
+    <!-- Header Bar -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <div class="brand-logo-icon">F</div>
+          <div class="brand-text">
+            <span class="brand-title">FinanceiT</span>
+            <span class="brand-tagline">Your Money. Your Control.</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-header-reports" class="btn-header-action" title="Financial Reports" aria-label="View Financial Reports">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </button>
+          <button id="theme-toggle-btn" class="btn-header-action" title="Toggle Theme" aria-label="Toggle Theme">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <button id="btn-quick-add" class="btn-primary-add" title="Add Transaction" aria-label="Add Transaction">
+            <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="app-main">
+      <div id="view-dashboard" class="app-view"></div>
+      <div id="view-transactions" class="app-view"></div>
+      <div id="view-budget" class="app-view"></div>
+      <div id="view-calendar" class="app-view"></div>
+      <div id="view-reports" class="app-view"></div>
+      <div id="view-settings" class="app-view"></div>
+    </main>
+
+    <!-- Bottom Navigation Bar (iOS Style) -->
+    <nav class="bottom-nav" aria-label="Main Navigation">
+      <div class="bottom-nav-inner">
+        <button class="nav-tab active" data-view="dashboard" aria-label="Dashboard">
+          <span class="nav-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span class="nav-label">Home</span>
+        </button>
+
+        <button class="nav-tab" data-view="transactions" aria-label="Transactions">
+          <span class="nav-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <span class="nav-label">Transactions</span>
+        </button>
+
+        <button class="nav-tab" data-view="budget" aria-label="Budget">
+          <span class="nav-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </span>
+          <span class="nav-label">Budget</span>
+        </button>
+
+        <button class="nav-tab" data-view="calendar" aria-label="Calendar">
+          <span class="nav-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <span class="nav-label">Calendar</span>
+        </button>
+
+        <button class="nav-tab" data-view="settings" aria-label="Settings">
+          <span class="nav-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Add / Edit Transaction Modal -->
+  <div id="modal-transaction" class="modal" role="dialog" aria-modal="true" aria-labelledby="tx-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="tx-modal-title" class="modal-title">Add Transaction</h3>
+        <button class="btn-close-modal" data-close-modal="modal-transaction" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-transaction" class="modal-form">
+        <input type="hidden" id="tx-id" />
+        <input type="hidden" id="tx-type" value="expense" />
+
+        <!-- Segmented Type Picker -->
+        <div class="segmented-control modal-segments">
+          <button type="button" class="segment-btn tx-type-pill active" data-type="expense">Expense</button>
+          <button type="button" class="segment-btn tx-type-pill" data-type="income">Income</button>
+          <button type="button" class="segment-btn tx-type-pill" data-type="transfer">Transfer</button>
+        </div>
+
+        <div class="form-group amount-group">
+          <label for="tx-amount" class="form-label">Amount (PHP)</label>
+          <div class="amount-input-wrap">
+            <span class="currency-prefix">₱</span>
+            <input type="number" id="tx-amount" class="ios-input-lg" step="0.01" min="0.01" placeholder="0.00" required autofocus />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tx-category" class="form-label">Category</label>
+          <select id="tx-category" class="ios-select" required></select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="tx-date" class="form-label">Date</label>
+            <input type="date" id="tx-date" class="ios-input" required />
+          </div>
+          <div class="form-group col-half">
+            <label for="tx-payment-method" class="form-label">Payment Method</label>
+            <select id="tx-payment-method" class="ios-select">
+              <option value="Cash">Cash</option>
+              <option value="GCash">GCash</option>
+              <option value="Maya">Maya</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Credit Card">Credit Card</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tx-description" class="form-label">Description / Payee (Optional)</label>
+          <input type="text" id="tx-description" class="ios-input" placeholder="e.g. Puregold Groceries, Gas Shell" />
+        </div>
+
+        <div class="form-group">
+          <label for="tx-notes" class="form-label">Notes (Optional)</label>
+          <input type="text" id="tx-notes" class="ios-input" placeholder="Additional details..." />
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" id="btn-delete-tx" class="ios-btn ios-btn-danger" style="display:none;">Delete</button>
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Confirm Salary Receipt Modal -->
+  <div id="modal-confirm-salary" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-salary-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="confirm-salary-title" class="modal-title">Confirm Salary Receipt</h3>
+        <button class="btn-close-modal" data-close-modal="modal-confirm-salary" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-confirm-salary" class="modal-form">
+        <input type="hidden" id="confirm-salary-payday-date" />
+
+        <div class="salary-confirm-badge">
+          <span>Scheduled Payday: <strong id="confirm-salary-date-label"></strong></span>
+        </div>
+
+        <div class="form-group amount-group">
+          <label for="confirm-salary-amount" class="form-label">Actual Take-Home Received (PHP)</label>
+          <div class="amount-input-wrap">
+            <span class="currency-prefix">₱</span>
+            <input type="number" id="confirm-salary-amount" class="ios-input-lg" step="0.01" min="0.01" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-salary-account" class="form-label">Deposit Destination</label>
+          <select id="confirm-salary-account" class="ios-select">
+            <option value="Bank Transfer">Bank Account</option>
+            <option value="Cash">Cash on Hand</option>
+            <option value="GCash">GCash</option>
+            <option value="Maya">Maya</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-salary-desc" class="form-label">Description</label>
+          <input type="text" id="confirm-salary-desc" class="ios-input" />
+        </div>
+
+        <p class="form-hint-text">
+          Once confirmed, this exact amount will be credited to your available balance and recorded in transaction history.
+        </p>
+
+        <div class="modal-footer-actions">
+          <button type="button" class="ios-btn ios-btn-secondary" data-close-modal="modal-confirm-salary">Cancel</button>
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Confirm & Credit Balance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Salary Configuration Modal -->
+  <div id="modal-salary-config" class="modal" role="dialog" aria-modal="true" aria-labelledby="salary-config-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="salary-config-title" class="modal-title">Configure Salary Schedule</h3>
+        <button class="btn-close-modal" data-close-modal="modal-salary-config" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-salary-config" class="modal-form">
+        <div class="form-group">
+          <label for="salary-employer" class="form-label">Employer / Income Source</label>
+          <input type="text" id="salary-employer" class="ios-input" placeholder="e.g. Primary Company, Freelance" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="salary-gross" class="form-label">Gross Salary (PHP)</label>
+            <input type="number" id="salary-gross" class="ios-input" step="0.01" min="0" placeholder="0.00" />
+          </div>
+          <div class="form-group col-half">
+            <label for="salary-takehome" class="form-label">Net Take-Home (PHP)</label>
+            <input type="number" id="salary-takehome" class="ios-input font-bold" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="salary-deductions" class="form-label">Estimated Deductions (Tax, SSS, PhilHealth, Pag-IBIG)</label>
+          <input type="number" id="salary-deductions" class="ios-input" step="0.01" min="0" placeholder="0.00" />
+        </div>
+
+        <div class="form-group">
+          <label for="salary-schedule-select" class="form-label">Payment Frequency Schedule</label>
+          <select id="salary-schedule-select" class="ios-select">
+            <option value="twice_monthly">Twice Monthly (e.g. 15th & 30th)</option>
+            <option value="monthly">Monthly (e.g. 25th or 30th)</option>
+            <option value="every_15_days">Every 15 Days (Rolling Cycle)</option>
+            <option value="weekly">Weekly</option>
+            <option value="irregular">Irregular / Custom</option>
+          </select>
+        </div>
+
+        <div id="schedule-twice-fields" class="form-row">
+          <div class="form-group col-half">
+            <label for="salary-first-day" class="form-label">1st Payday of Month</label>
+            <input type="number" id="salary-first-day" class="ios-input" min="1" max="31" value="15" />
+          </div>
+          <div class="form-group col-half">
+            <label for="salary-second-day" class="form-label">2nd Payday of Month</label>
+            <input type="number" id="salary-second-day" class="ios-input" min="1" max="31" value="30" />
+          </div>
+        </div>
+
+        <div id="schedule-monthly-fields" class="form-group" style="display:none;">
+          <label for="salary-monthly-day" class="form-label">Monthly Payday (Day of month)</label>
+          <input type="number" id="salary-monthly-day" class="ios-input" min="1" max="31" value="30" />
+        </div>
+
+        <div id="schedule-anchor-fields" class="form-group" style="display:none;">
+          <label for="salary-anchor-date" class="form-label">Anchor Start Payday Date</label>
+          <input type="date" id="salary-anchor-date" class="ios-input" />
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Save Salary Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Add / Edit Budget Modal -->
+  <div id="modal-budget" class="modal" role="dialog" aria-modal="true" aria-labelledby="budget-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="budget-modal-title" class="modal-title">Set Category Budget</h3>
+        <button class="btn-close-modal" data-close-modal="modal-budget" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-budget" class="modal-form">
+        <input type="hidden" id="budget-id" />
+        <input type="hidden" id="budget-period" />
+
+        <div class="form-group">
+          <label for="budget-category" class="form-label">Expense Category</label>
+          <select id="budget-category" class="ios-select" required></select>
+        </div>
+
+        <div class="form-group amount-group">
+          <label for="budget-amount" class="form-label">Planned Limit for Month (PHP)</label>
+          <div class="amount-input-wrap">
+            <span class="currency-prefix">₱</span>
+            <input type="number" id="budget-amount" class="ios-input-lg" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" id="btn-delete-budget" class="ios-btn ios-btn-danger" style="display:none;">Remove</button>
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Save Budget</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Recurring Bill Modal -->
+  <div id="modal-recurring-bill" class="modal" role="dialog" aria-modal="true" aria-labelledby="bill-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="bill-modal-title" class="modal-title">Recurring Bill Schedule</h3>
+        <button class="btn-close-modal" data-close-modal="modal-recurring-bill" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-recurring-bill" class="modal-form">
+        <input type="hidden" id="bill-id" />
+
+        <div class="form-group">
+          <label for="bill-name" class="form-label">Bill / Subscription Name</label>
+          <input type="text" id="bill-name" class="ios-input" placeholder="e.g. Converge Wi-Fi, Netflix, Meralco" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="bill-amount" class="form-label">Amount (PHP)</label>
+            <input type="number" id="bill-amount" class="ios-input" step="0.01" min="0.01" required />
+          </div>
+          <div class="form-group col-half">
+            <label for="bill-due-day" class="form-label">Due Day of Month</label>
+            <input type="number" id="bill-due-day" class="ios-input" min="1" max="31" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="bill-category" class="form-label">Category</label>
+            <select id="bill-category" class="ios-select" required></select>
+          </div>
+          <div class="form-group col-half">
+            <label for="bill-frequency" class="form-label">Frequency</label>
+            <select id="bill-frequency" class="ios-select">
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="annual">Annual</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Save Bill Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Pay Recurring Bill Modal -->
+  <div id="modal-pay-bill" class="modal" role="dialog" aria-modal="true" aria-labelledby="pay-bill-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="pay-bill-title" class="modal-title">Pay Bill</h3>
+        <button class="btn-close-modal" data-close-modal="modal-pay-bill" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-pay-bill" class="modal-form">
+        <input type="hidden" id="pay-bill-id" />
+
+        <div class="bill-pay-header-info">
+          <span class="bill-pay-name" id="pay-bill-title-label"></span>
+        </div>
+
+        <div class="form-group amount-group">
+          <label for="pay-bill-amount" class="form-label">Payment Amount (PHP)</label>
+          <div class="amount-input-wrap">
+            <span class="currency-prefix">₱</span>
+            <input type="number" id="pay-bill-amount" class="ios-input-lg" step="0.01" min="0.01" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="pay-bill-date" class="form-label">Date Paid</label>
+            <input type="date" id="pay-bill-date" class="ios-input" required />
+          </div>
+          <div class="form-group col-half">
+            <label for="pay-bill-account" class="form-label">Paid Via</label>
+            <select id="pay-bill-account" class="ios-select">
+              <option value="GCash">GCash</option>
+              <option value="Maya">Maya</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cash">Cash</option>
+              <option value="Debit Card">Debit Card</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Confirm Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Custom Category Modal -->
+  <div id="modal-category" class="modal" role="dialog" aria-modal="true" aria-labelledby="cat-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="cat-modal-title" class="modal-title">New Category</h3>
+        <button class="btn-close-modal" data-close-modal="modal-category" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-category" class="modal-form">
+        <div class="form-group">
+          <label for="cat-name" class="form-label">Category Name</label>
+          <input type="text" id="cat-name" class="ios-input" placeholder="e.g. Gym & Fitness" required />
+        </div>
+
+        <div class="form-group">
+          <label for="cat-type" class="form-label">Type</label>
+          <select id="cat-type" class="ios-select">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cat-icon" class="form-label">Icon</label>
+          <select id="cat-icon" class="ios-select">
+            <option value="tag">Tag (Default)</option>
+            <option value="cart">Cart / Shopping</option>
+            <option value="fuel">Fuel / Gas</option>
+            <option value="wrench">Wrench / Maintenance</option>
+            <option value="bus">Bus / Travel</option>
+            <option value="shirt">Clothes</option>
+            <option value="laptop">Tech / Computer</option>
+            <option value="wifi">Wi-Fi / Internet</option>
+            <option value="phone">Phone / Load</option>
+            <option value="zap">Electricity / Utilities</option>
+            <option value="home">Home / Rent</option>
+            <option value="heart">Heart / Offering</option>
+            <option value="gift">Gift / Giving</option>
+            <option value="book">Book / Education</option>
+            <option value="activity">Medical / Health</option>
+            <option value="film">Entertainment</option>
+            <option value="briefcase">Briefcase / Salary</option>
+            <option value="shield">Savings / Shield</option>
+          </select>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Create Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Opening Balances Modal -->
+  <div id="modal-opening-balances" class="modal" role="dialog" aria-modal="true" aria-labelledby="balances-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="balances-modal-title" class="modal-title">Adjust Opening Balances</h3>
+        <button class="btn-close-modal" data-close-modal="modal-opening-balances" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="form-opening-balances" class="modal-form">
+        <div class="form-group">
+          <label for="balance-cash" class="form-label">Available Cash / Bank Starting Balance (PHP)</label>
+          <input type="number" id="balance-cash" class="ios-input" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="balance-savings" class="form-label">Savings Starting Balance (PHP)</label>
+          <input type="number" id="balance-savings" class="ios-input" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="balance-emergency" class="form-label">Emergency Fund Starting Balance (PHP)</label>
+          <input type="number" id="balance-emergency" class="ios-input" step="0.01" min="0" />
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="submit" class="ios-btn ios-btn-primary flex-fill">Save Opening Balances</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Import JSON Preview Modal -->
+  <div id="modal-import-preview" class="modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="import-modal-title" class="modal-title">Restore JSON Backup</h3>
+        <button class="btn-close-modal" data-close-modal="modal-import-preview" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="import-preview-body">
+        <p>Valid FinanceiT backup package detected. Choose how you want to restore these records:</p>
+        <div class="import-stats-box">
+          <div class="import-stat-item" id="import-stat-tx">0 Transactions</div>
+          <div class="import-stat-item" id="import-stat-cat">0 Categories</div>
+          <div class="import-stat-item" id="import-stat-budget">0 Budgets</div>
+          <div class="import-stat-item" id="import-stat-bills">0 Bills</div>
+        </div>
+
+        <div class="import-options-col">
+          <button id="btn-import-replace" class="ios-btn ios-btn-danger">
+            Replace All Existing Records
+          </button>
+          <button id="btn-import-merge" class="ios-btn ios-btn-secondary">
+            Merge with Existing Records
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Reset Confirmation Modal -->
+  <div id="modal-reset-confirmation" class="modal" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="reset-modal-title" class="modal-title text-expense">Reset All Data</h3>
+        <button class="btn-close-modal" data-close-modal="modal-reset-confirmation" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="reset-modal-body">
+        <p class="reset-warning-desc">
+          This will permanently delete all transactions, budgets, salary logs, and recurring bills from your device. This cannot be undone.
+        </p>
+        <p>Type <strong>RESET</strong> below to confirm:</p>
+        <input type="text" id="reset-confirm-text" class="ios-input text-center font-bold" placeholder="RESET" />
+
+        <div class="modal-footer-actions">
+          <button type="button" class="ios-btn ios-btn-secondary" data-close-modal="modal-reset-confirmation">Cancel</button>
+          <button type="button" id="btn-confirm-full-reset" class="ios-btn ios-btn-danger flex-fill">Confirm Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Bootstrap -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
