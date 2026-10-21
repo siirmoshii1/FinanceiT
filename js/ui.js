@@ -86,6 +86,30 @@ export function initTheme() {
       applyTheme('system');
     }
   });
+
+  initFontSize();
+}
+
+// ================= FONT SIZE CONTROLLER =================
+
+export function initFontSize() {
+  const saved = localStorage.getItem('financeit_fontsize') || 'normal';
+  applyFontSize(saved);
+}
+
+export function applyFontSize(size) {
+  const valid = ['small', 'normal', 'large', 'xlarge'];
+  const safe = valid.includes(size) ? size : 'normal';
+  document.documentElement.setAttribute('data-font-size', safe);
+  localStorage.setItem('financeit_fontsize', safe);
+
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    if (btn.getAttribute('data-size') === safe) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
 }
 
 export function applyTheme(theme) {

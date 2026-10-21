@@ -15,83 +15,86 @@ export function renderBudget() {
   const allocation = calculateSalaryAllocation();
 
   let html = `
-    <!-- Top Period & Summary Card -->
-    <div class="ios-card budget-summary-card">
-      <div class="card-section-header">
-        <div>
-          <h2 class="card-title">Budget Planning</h2>
-          <span class="card-subtitle">${formatMonthLabel(budgetStatus.period)}</span>
+    <!-- Top Row (Summary + Salary Allocation) -->
+    <div class="budget-top-grid">
+      <!-- Top Period & Summary Card -->
+      <div class="ios-card budget-summary-card">
+        <div class="card-section-header">
+          <div>
+            <h2 class="card-title">Budget Planning</h2>
+            <span class="card-subtitle">${formatMonthLabel(budgetStatus.period)}</span>
+          </div>
+          <button class="ios-btn-compact" id="btn-quick-add-budget">
+            ${getIcon('plus', 14)} Set Budget
+          </button>
         </div>
-        <button class="ios-btn-compact" id="btn-quick-add-budget">
-          ${getIcon('plus', 14)} Set Budget
-        </button>
+
+        <div class="budget-main-stat">
+          <div class="budget-stat-col">
+            <span class="b-stat-label">Total Planned</span>
+            <span class="b-stat-val">${formatPHP(budgetStatus.totalPlannedCentavos)}</span>
+          </div>
+          <div class="budget-stat-col">
+            <span class="b-stat-label">Actual Spent</span>
+            <span class="b-stat-val ${budgetStatus.totalActualCentavos > budgetStatus.totalPlannedCentavos ? 'text-expense' : ''}">
+              ${formatPHP(budgetStatus.totalActualCentavos)}
+            </span>
+          </div>
+          <div class="budget-stat-col">
+            <span class="b-stat-label">Remaining</span>
+            <span class="b-stat-val ${budgetStatus.totalRemainingCentavos < 0 ? 'text-expense' : 'text-income'}">
+              ${formatPHP(budgetStatus.totalRemainingCentavos)}
+            </span>
+          </div>
+        </div>
+
+        <!-- Overall progress -->
+        <div class="budget-total-progress-bar">
+          <div class="progress-track-lg">
+            <div class="progress-fill ${budgetStatus.overallPercent > 100 ? 'fill-exceeded' : (budgetStatus.overallPercent >= 85 ? 'fill-warning' : '')}"
+                 style="width: ${Math.min(budgetStatus.overallPercent, 100)}%;"></div>
+          </div>
+          <div class="progress-sub-row">
+            <span>Overall Usage</span>
+            <span class="font-mono ${budgetStatus.overallPercent > 100 ? 'text-expense' : ''}">${budgetStatus.overallPercent}%</span>
+          </div>
+        </div>
       </div>
 
-      <div class="budget-main-stat">
-        <div class="budget-stat-col">
-          <span class="b-stat-label">Total Planned</span>
-          <span class="b-stat-val">${formatPHP(budgetStatus.totalPlannedCentavos)}</span>
-        </div>
-        <div class="budget-stat-col">
-          <span class="b-stat-label">Actual Spent</span>
-          <span class="b-stat-val ${budgetStatus.totalActualCentavos > budgetStatus.totalPlannedCentavos ? 'text-expense' : ''}">
-            ${formatPHP(budgetStatus.totalActualCentavos)}
+      <!-- Salary Allocation Planner Card -->
+      <div class="ios-card allocation-card">
+        <div class="card-section-header">
+          <h2 class="card-title">Salary Allocation Planner</h2>
+          <span class="badge-pill ${allocation.isOverallocated ? 'badge-danger' : 'badge-neutral'}">
+            ${allocation.isOverallocated ? 'Overallocated' : 'Balanced'}
           </span>
         </div>
-        <div class="budget-stat-col">
-          <span class="b-stat-label">Remaining</span>
-          <span class="b-stat-val ${budgetStatus.totalRemainingCentavos < 0 ? 'text-expense' : 'text-income'}">
-            ${formatPHP(budgetStatus.totalRemainingCentavos)}
-          </span>
-        </div>
-      </div>
 
-      <!-- Overall progress -->
-      <div class="budget-total-progress-bar">
-        <div class="progress-track-lg">
-          <div class="progress-fill ${budgetStatus.overallPercent > 100 ? 'fill-exceeded' : (budgetStatus.overallPercent >= 85 ? 'fill-warning' : '')}"
-               style="width: ${Math.min(budgetStatus.overallPercent, 100)}%;"></div>
+        <div class="allocation-grid">
+          <div class="alloc-item">
+            <span class="alloc-label">Expected Take-Home</span>
+            <span class="alloc-val">${formatPHP(allocation.takeHomeCentavos)}</span>
+          </div>
+          <div class="alloc-item">
+            <span class="alloc-label">Planned Expenses</span>
+            <span class="alloc-val text-expense">-${formatPHP(allocation.plannedExpenses)}</span>
+          </div>
+          <div class="alloc-item">
+            <span class="alloc-label">Planned Savings</span>
+            <span class="alloc-val text-transfer">-${formatPHP(allocation.plannedSavings)}</span>
+          </div>
+          <div class="alloc-item highlight-box ${allocation.isOverallocated ? 'box-danger' : 'box-good'}">
+            <span class="alloc-label">${allocation.isOverallocated ? 'Overallocated By' : 'Unallocated Money'}</span>
+            <span class="alloc-val font-bold">${formatPHP(Math.abs(allocation.unallocatedCentavos))}</span>
+          </div>
         </div>
-        <div class="progress-sub-row">
-          <span>Overall Usage</span>
-          <span class="font-mono ${budgetStatus.overallPercent > 100 ? 'text-expense' : ''}">${budgetStatus.overallPercent}%</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Salary Allocation Planner Card -->
-    <div class="ios-card allocation-card">
-      <div class="card-section-header">
-        <h2 class="card-title">Salary Allocation Planner</h2>
-        <span class="badge-pill ${allocation.isOverallocated ? 'badge-danger' : 'badge-neutral'}">
-          ${allocation.isOverallocated ? 'Overallocated' : 'Balanced'}
-        </span>
+        ${allocation.takeHomeCentavos === 0 ? `
+          <div class="alloc-hint-bar">
+            ${getIcon('info', 14)} <span>Set up your salary take-home in Settings to enable automatic allocation planning.</span>
+          </div>
+        ` : ''}
       </div>
-
-      <div class="allocation-grid">
-        <div class="alloc-item">
-          <span class="alloc-label">Expected Take-Home</span>
-          <span class="alloc-val">${formatPHP(allocation.takeHomeCentavos)}</span>
-        </div>
-        <div class="alloc-item">
-          <span class="alloc-label">Planned Expenses</span>
-          <span class="alloc-val text-expense">-${formatPHP(allocation.plannedExpenses)}</span>
-        </div>
-        <div class="alloc-item">
-          <span class="alloc-label">Planned Savings</span>
-          <span class="alloc-val text-transfer">-${formatPHP(allocation.plannedSavings)}</span>
-        </div>
-        <div class="alloc-item highlight-box ${allocation.isOverallocated ? 'box-danger' : 'box-good'}">
-          <span class="alloc-label">${allocation.isOverallocated ? 'Overallocated By' : 'Unallocated Money'}</span>
-          <span class="alloc-val font-bold">${formatPHP(Math.abs(allocation.unallocatedCentavos))}</span>
-        </div>
-      </div>
-
-      ${allocation.takeHomeCentavos === 0 ? `
-        <div class="alloc-hint-bar">
-          ${getIcon('info', 14)} <span>Set up your salary take-home in Settings to enable automatic allocation planning.</span>
-        </div>
-      ` : ''}
     </div>
 
     <!-- Categories Budget List -->

@@ -63,120 +63,122 @@ export function renderCalendar() {
   const isSelectedSalary = salaryDates.has(selectedDateStr);
 
   let html = `
-    <!-- Calendar Controls Header -->
-    <div class="ios-card calendar-header-card">
-      <div class="calendar-nav-bar">
-        <button class="btn-icon-subtle" id="cal-prev-month" aria-label="Previous Month">
-          ${getIcon('chevronLeft', 20)}
-        </button>
-        <h2 class="calendar-current-month">${formatMonthLabel(currPeriodStr)}</h2>
-        <button class="btn-icon-subtle" id="cal-next-month" aria-label="Next Month">
-          ${getIcon('chevronRight', 20)}
-        </button>
-      </div>
-
-      <!-- Days of week -->
-      <div class="cal-weekdays-row">
-        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-      </div>
-
-      <!-- Month Grid -->
-      <div class="cal-days-grid">
-        ${renderCalendarCells({
-          firstDayOfMonth,
-          daysInMonth,
-          currPeriodStr,
-          todayStr,
-          selectedDateStr,
-          txByDay,
-          billsByDay,
-          salaryDates
-        })}
-      </div>
-
-      <!-- Legend -->
-      <div class="cal-legend">
-        <span class="legend-item"><span class="dot dot-salary"></span> Salary</span>
-        <span class="legend-item"><span class="dot dot-bill"></span> Bill Due</span>
-        <span class="legend-item"><span class="dot dot-income"></span> Income</span>
-        <span class="legend-item"><span class="dot dot-expense"></span> Expense</span>
-      </div>
-    </div>
-
-    <!-- Day Inspector -->
-    <div class="ios-card day-inspector-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">${formatDateLabel(selectedDateStr)}</h3>
-          <span class="card-subtitle">${selectedDateStr === todayStr ? 'Today' : 'Selected Date'}</span>
+    <div class="calendar-layout-wrapper">
+      <!-- Calendar Controls Header -->
+      <div class="ios-card calendar-header-card">
+        <div class="calendar-nav-bar">
+          <button class="btn-icon-subtle" id="cal-prev-month" aria-label="Previous Month">
+            ${getIcon('chevronLeft', 20)}
+          </button>
+          <h2 class="calendar-current-month">${formatMonthLabel(currPeriodStr)}</h2>
+          <button class="btn-icon-subtle" id="cal-next-month" aria-label="Next Month">
+            ${getIcon('chevronRight', 20)}
+          </button>
         </div>
-        <button class="ios-btn-compact" id="btn-add-tx-for-day">
-          ${getIcon('plus', 14)} Add
-        </button>
+
+        <!-- Days of week -->
+        <div class="cal-weekdays-row">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+
+        <!-- Month Grid -->
+        <div class="cal-days-grid">
+          ${renderCalendarCells({
+            firstDayOfMonth,
+            daysInMonth,
+            currPeriodStr,
+            todayStr,
+            selectedDateStr,
+            txByDay,
+            billsByDay,
+            salaryDates
+          })}
+        </div>
+
+        <!-- Legend -->
+        <div class="cal-legend">
+          <span class="legend-item"><span class="dot dot-salary"></span> Salary</span>
+          <span class="legend-item"><span class="dot dot-bill"></span> Bill Due</span>
+          <span class="legend-item"><span class="dot dot-income"></span> Income</span>
+          <span class="legend-item"><span class="dot dot-expense"></span> Expense</span>
+        </div>
       </div>
 
-      ${isSelectedSalary ? `
-        <div class="cal-event-banner banner-salary">
-          <div class="banner-icon">${getIcon('briefcase', 16)}</div>
-          <div class="banner-info">
-            <strong>Scheduled Payday</strong>
-            <span>Take-home: ${formatPHP(settings?.takeHomeCentavos || 0)}</span>
+      <!-- Day Inspector -->
+      <div class="ios-card day-inspector-card">
+        <div class="card-section-header">
+          <div>
+            <h3 class="card-title">${formatDateLabel(selectedDateStr)}</h3>
+            <span class="card-subtitle">${selectedDateStr === todayStr ? 'Today' : 'Selected Date'}</span>
           </div>
+          <button class="ios-btn-compact" id="btn-add-tx-for-day">
+            ${getIcon('plus', 14)} Add
+          </button>
         </div>
-      ` : ''}
 
-      ${selectedBills.length > 0 ? `
-        <div class="cal-bills-section">
-          <span class="section-micro-label">BILLS DUE TODAY</span>
-          ${selectedBills.map(b => {
-            const isPaid = b.lastPaidDate && b.lastPaidDate.startsWith(currPeriodStr);
-            return `
-              <div class="cal-bill-row">
-                <div>
-                  <span class="cal-bill-name">${escapeHtml(b.name)}</span>
-                  <span class="cal-bill-status">${isPaid ? 'Paid' : 'Pending payment'}</span>
-                </div>
-                <div class="cal-bill-val">
-                  <span>${formatPHP(b.amountCentavos)}</span>
-                  ${!isPaid ? `
-                    <button class="btn-pay-bill btn-pay-bill-sm" data-bill-id="${b.id}">Pay</button>
-                  ` : `<span class="paid-check">${getIcon('check', 14)}</span>`}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      ` : ''}
+        ${isSelectedSalary ? `
+          <div class="cal-event-banner banner-salary">
+            <div class="banner-icon">${getIcon('briefcase', 16)}</div>
+            <div class="banner-info">
+              <strong>Scheduled Payday</strong>
+              <span>Take-home: ${formatPHP(settings?.takeHomeCentavos || 0)}</span>
+            </div>
+          </div>
+        ` : ''}
 
-      <div class="cal-tx-section">
-        <span class="section-micro-label">TRANSACTIONS (${selectedTxList.length})</span>
-        ${selectedTxList.length === 0 ? `
-          <div class="empty-list-notice">No transactions recorded on this date.</div>
-        ` : `
-          <div class="tx-compact-list">
-            ${selectedTxList.map(tx => {
-              const isInc = tx.type === 'income';
-              const isTrans = tx.type === 'transfer';
-              const cat = getCategoryById(tx.categoryId);
+        ${selectedBills.length > 0 ? `
+          <div class="cal-bills-section">
+            <span class="section-micro-label">BILLS DUE TODAY</span>
+            ${selectedBills.map(b => {
+              const isPaid = b.lastPaidDate && b.lastPaidDate.startsWith(currPeriodStr);
               return `
-                <div class="tx-row" data-tx-id="${tx.id}">
-                  <div class="tx-row-left">
-                    <div class="tx-cat-icon icon-${tx.type}">${getIcon(cat.icon || 'tag', 16)}</div>
-                    <div class="tx-info">
-                      <span class="tx-desc">${escapeHtml(tx.description || cat.name)}</span>
-                      <span class="tx-sub">${escapeHtml(cat.name)}</span>
-                    </div>
+                <div class="cal-bill-row">
+                  <div>
+                    <span class="cal-bill-name">${escapeHtml(b.name)}</span>
+                    <span class="cal-bill-status">${isPaid ? 'Paid' : 'Pending payment'}</span>
                   </div>
-                  <div class="tx-row-right">
-                    <span class="tx-amount ${isInc ? 'text-income' : (isTrans ? 'text-transfer' : 'text-expense')}">
-                      ${isInc ? '+' : (isTrans ? '' : '-')}${formatPHP(tx.amountCentavos)}
-                    </span>
+                  <div class="cal-bill-val">
+                    <span>${formatPHP(b.amountCentavos)}</span>
+                    ${!isPaid ? `
+                      <button class="btn-pay-bill btn-pay-bill-sm" data-bill-id="${b.id}">Pay</button>
+                    ` : `<span class="paid-check">${getIcon('check', 14)}</span>`}
                   </div>
                 </div>
               `;
             }).join('')}
           </div>
-        `}
+        ` : ''}
+
+        <div class="cal-tx-section">
+          <span class="section-micro-label">TRANSACTIONS (${selectedTxList.length})</span>
+          ${selectedTxList.length === 0 ? `
+            <div class="empty-list-notice">No transactions recorded on this date.</div>
+          ` : `
+            <div class="tx-compact-list">
+              ${selectedTxList.map(tx => {
+                const isInc = tx.type === 'income';
+                const isTrans = tx.type === 'transfer';
+                const cat = getCategoryById(tx.categoryId);
+                return `
+                  <div class="tx-row" data-tx-id="${tx.id}">
+                    <div class="tx-row-left">
+                      <div class="tx-cat-icon icon-${tx.type}">${getIcon(cat.icon || 'tag', 16)}</div>
+                      <div class="tx-info">
+                        <span class="tx-desc">${escapeHtml(tx.description || cat.name)}</span>
+                        <span class="tx-sub">${escapeHtml(cat.name)}</span>
+                      </div>
+                    </div>
+                    <div class="tx-row-right">
+                      <span class="tx-amount ${isInc ? 'text-income' : (isTrans ? 'text-transfer' : 'text-expense')}">
+                        ${isInc ? '+' : (isTrans ? '' : '-')}${formatPHP(tx.amountCentavos)}
+                      </span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
       </div>
     </div>
   `;

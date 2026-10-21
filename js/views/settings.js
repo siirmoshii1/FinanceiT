@@ -5,7 +5,7 @@
 
 import { State, formatPHP, toCentavos, toPesos, reloadAllState } from '../state.js';
 import * as DB from '../db.js';
-import { getIcon, openModal, closeModal, showToast, escapeHtml } from '../ui.js';
+import { getIcon, openModal, closeModal, showToast, escapeHtml, applyFontSize, applyTheme } from '../ui.js';
 
 export function renderSettings() {
   const container = document.getElementById('view-settings');
@@ -15,6 +15,8 @@ export function renderSettings() {
   const recurringBills = State.recurringBills.filter(b => !b.isArchived);
   const categories = State.categories;
   const accounts = State.accounts;
+  const currentFontSize = localStorage.getItem('financeit_fontsize') || 'normal';
+  const currentTheme = localStorage.getItem('financeit_theme') || 'system';
 
   let html = `
     <!-- Top Header -->
@@ -22,193 +24,245 @@ export function renderSettings() {
       <div class="card-section-header">
         <div>
           <h2 class="card-title">Preferences & Settings</h2>
-          <span class="card-subtitle">FinanceiT v1.0.0 &bull; Offline & Private</span>
+          <span class="card-subtitle">FinanceiT v1.0.0 &bull; 100% Local Storage</span>
         </div>
       </div>
       <p class="settings-intro-text">
-        All financial records are stored strictly on this device inside IndexedDB. No servers, no tracking, and no external APIs.
+        All financial records and preferences are stored strictly on this device inside IndexedDB & LocalStorage. Zero servers, zero tracking, zero cloud data transfer.
       </p>
     </div>
 
-    <!-- Salary Configuration Card -->
-    <div class="ios-card" id="salary-config-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Salary & Income Configuration</h3>
-          <span class="card-subtitle">Automate your expected paydays & allocation</span>
-        </div>
-        <button class="ios-btn-compact" id="btn-edit-salary-config">
-          ${getIcon('edit', 14)} Edit
-        </button>
-      </div>
-
-      <div class="settings-display-grid">
-        <div class="settings-display-item">
-          <span class="set-label">Primary Source</span>
-          <span class="set-val">${escapeHtml(salary.employer || 'Not set')}</span>
-        </div>
-        <div class="settings-display-item">
-          <span class="set-label">Schedule Type</span>
-          <span class="set-val font-capitalize">${formatScheduleType(salary.scheduleType)}</span>
-        </div>
-        <div class="settings-display-item">
-          <span class="set-label">Expected Take-Home</span>
-          <span class="set-val font-bold text-income">${formatPHP(salary.takeHomeCentavos)}</span>
-        </div>
-        <div class="settings-display-item">
-          <span class="set-label">Gross / Deductions</span>
-          <span class="set-val">${formatPHP(salary.grossAmountCentavos)} / -${formatPHP(salary.deductionsCentavos)}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recurring Bills Manager -->
-    <div class="ios-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Recurring Bills & Subscriptions</h3>
-          <span class="card-subtitle">${recurringBills.length} Active Schedules</span>
-        </div>
-        <button class="ios-btn-compact" id="btn-add-recurring-bill">
-          ${getIcon('plus', 14)} Add Bill
-        </button>
-      </div>
-
-      ${recurringBills.length === 0 ? `
-        <div class="empty-list-notice">No recurring bills added. Add Wi-Fi, utilities, subscriptions, or load.</div>
-      ` : `
-        <div class="settings-items-list">
-          ${recurringBills.map(b => `
-            <div class="settings-row-item">
-              <div class="set-item-left">
-                <span class="set-item-title">${escapeHtml(b.name)}</span>
-                <span class="set-item-sub">Due every ${b.dueDay}${getOrdinal(b.dueDay)} &bull; ${formatPHP(b.amountCentavos)}</span>
-              </div>
-              <div class="set-item-actions">
-                <button class="btn-icon-subtle btn-edit-bill" data-bill-id="${b.id}" title="Edit Bill">
-                  ${getIcon('edit', 14)}
-                </button>
-                <button class="btn-icon-subtle btn-delete-bill" data-bill-id="${b.id}" title="Delete Bill">
-                  ${getIcon('trash', 14)}
-                </button>
-              </div>
+    <!-- Responsive Settings Grid -->
+    <div class="settings-layout-grid">
+      <div class="settings-col">
+        <!-- Appearance & Typography Card -->
+        <div class="ios-card display-config-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Display & Typography</h3>
+              <span class="card-subtitle">Adjust text scaling & color mode (persists locally)</span>
             </div>
-          `).join('')}
-        </div>
-      `}
-    </div>
+          </div>
 
-    <!-- Categories Manager -->
-    <div class="ios-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Expense & Income Categories</h3>
-          <span class="card-subtitle">${categories.filter(c => !c.isArchived).length} Active Categories</span>
-        </div>
-        <button class="ios-btn-compact" id="btn-add-custom-cat">
-          ${getIcon('plus', 14)} New Category
-        </button>
-      </div>
+          <div class="settings-sub-section">
+            <label class="set-label">App Font Size</label>
+            <div class="segmented-control font-size-picker">
+              <button type="button" class="segment-btn font-size-btn ${currentFontSize === 'small' ? 'active' : ''}" data-size="small">
+                Small <span class="font-preview-hint">(14px)</span>
+              </button>
+              <button type="button" class="segment-btn font-size-btn ${currentFontSize === 'normal' ? 'active' : ''}" data-size="normal">
+                Normal <span class="font-preview-hint">(16px)</span>
+              </button>
+              <button type="button" class="segment-btn font-size-btn ${currentFontSize === 'large' ? 'active' : ''}" data-size="large">
+                Large <span class="font-preview-hint">(18px)</span>
+              </button>
+              <button type="button" class="segment-btn font-size-btn ${currentFontSize === 'xlarge' ? 'active' : ''}" data-size="xlarge">
+                XL <span class="font-preview-hint">(20px)</span>
+              </button>
+            </div>
+          </div>
 
-      <div class="categories-scroll-list">
-        ${categories.map(c => `
-          <div class="category-pill-item ${c.isArchived ? 'archived' : ''}">
-            <span class="cat-pill-icon">${getIcon(c.icon || 'tag', 14)}</span>
-            <span class="cat-pill-name">${escapeHtml(c.name)}</span>
-            ${c.isTransfer ? `<span class="badge-mini">Transfer</span>` : ''}
-            <button class="btn-archive-cat" data-cat-id="${c.id}" title="${c.isArchived ? 'Restore' : 'Archive'}">
-              ${c.isArchived ? getIcon('repeat', 12) : getIcon('close', 12)}
+          <div class="settings-sub-section" style="margin-top: 14px;">
+            <label class="set-label">Theme Mode</label>
+            <div class="segmented-control theme-picker">
+              <button type="button" class="segment-btn theme-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">
+                Dark (OLED)
+              </button>
+              <button type="button" class="segment-btn theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light">
+                Light
+              </button>
+              <button type="button" class="segment-btn theme-btn ${currentTheme === 'system' ? 'active' : ''}" data-theme="system">
+                Auto (System)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Salary Configuration Card -->
+        <div class="ios-card" id="salary-config-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Salary & Income Configuration</h3>
+              <span class="card-subtitle">Automate your expected paydays & allocation</span>
+            </div>
+            <button class="ios-btn-compact" id="btn-edit-salary-config">
+              ${getIcon('edit', 14)} Edit
             </button>
           </div>
-        `).join('')}
-      </div>
-    </div>
 
-    <!-- Accounts / Opening Balances -->
-    <div class="ios-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Account Opening Balances</h3>
-          <span class="card-subtitle">Starting capital balance</span>
-        </div>
-        <button class="ios-btn-compact" id="btn-edit-opening-balances">
-          ${getIcon('edit', 14)} Adjust
-        </button>
-      </div>
-
-      <div class="settings-display-grid">
-        ${accounts.map(acc => `
-          <div class="settings-display-item">
-            <span class="set-label">${escapeHtml(acc.name)}</span>
-            <span class="set-val">${formatPHP(acc.openingBalanceCentavos)}</span>
+          <div class="settings-display-grid">
+            <div class="settings-display-item">
+              <span class="set-label">Primary Source</span>
+              <span class="set-val">${escapeHtml(salary.employer || 'Not set')}</span>
+            </div>
+            <div class="settings-display-item">
+              <span class="set-label">Schedule Type</span>
+              <span class="set-val font-capitalize">${formatScheduleType(salary.scheduleType)}</span>
+            </div>
+            <div class="settings-display-item">
+              <span class="set-label">Expected Take-Home</span>
+              <span class="set-val font-bold text-income">${formatPHP(salary.takeHomeCentavos)}</span>
+            </div>
+            <div class="settings-display-item">
+              <span class="set-label">Gross / Deductions</span>
+              <span class="set-val">${formatPHP(salary.grossAmountCentavos)} / -${formatPHP(salary.deductionsCentavos)}</span>
+            </div>
           </div>
-        `).join('')}
-      </div>
-    </div>
+        </div>
 
-    <!-- Data Safety, Backup & Restore -->
-    <div class="ios-card data-safety-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Data Backup & Restore</h3>
-          <span class="card-subtitle">Keep your financial records safe</span>
+        <!-- Accounts / Opening Balances -->
+        <div class="ios-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Account Opening Balances</h3>
+              <span class="card-subtitle">Starting capital balance</span>
+            </div>
+            <button class="ios-btn-compact" id="btn-edit-opening-balances">
+              ${getIcon('edit', 14)} Adjust
+            </button>
+          </div>
+
+          <div class="settings-display-grid">
+            ${accounts.map(acc => `
+              <div class="settings-display-item">
+                <span class="set-label">${escapeHtml(acc.name)}</span>
+                <span class="set-val">${formatPHP(acc.openingBalanceCentavos)}</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
 
-      <div class="data-safety-warning">
-        ${getIcon('alertCircle', 16)}
-        <p>
-          Your data lives exclusively in this browser's IndexedDB. Clearing website storage or resetting your browser will erase your data. <strong>Export regular JSON backups to preserve your history.</strong>
-        </p>
-      </div>
+      <div class="settings-col">
+        <!-- Recurring Bills Manager -->
+        <div class="ios-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Recurring Bills & Subscriptions</h3>
+              <span class="card-subtitle">${recurringBills.length} Active Schedules</span>
+            </div>
+            <button class="ios-btn-compact" id="btn-add-recurring-bill">
+              ${getIcon('plus', 14)} Add Bill
+            </button>
+          </div>
 
-      <div class="backup-actions-grid">
-        <button class="ios-btn ios-btn-secondary" id="btn-export-json">
-          ${getIcon('download', 16)} Export JSON Backup
-        </button>
-        <button class="ios-btn ios-btn-secondary" id="btn-export-csv">
-          ${getIcon('download', 16)} Export CSV (Excel)
-        </button>
-        <button class="ios-btn ios-btn-secondary" id="btn-trigger-import-json">
-          ${getIcon('upload', 16)} Import JSON Backup
-        </button>
-        <input type="file" id="json-file-input" accept=".json" style="display:none;" />
-      </div>
+          ${recurringBills.length === 0 ? `
+            <div class="empty-list-notice">No recurring bills added. Add Wi-Fi, utilities, subscriptions, or load.</div>
+          ` : `
+            <div class="settings-items-list">
+              ${recurringBills.map(b => `
+                <div class="settings-row-item">
+                  <div class="set-item-left">
+                    <span class="set-item-title">${escapeHtml(b.name)}</span>
+                    <span class="set-item-sub">Due every ${b.dueDay}${getOrdinal(b.dueDay)} &bull; ${formatPHP(b.amountCentavos)}</span>
+                  </div>
+                  <div class="set-item-actions">
+                    <button class="btn-icon-subtle btn-edit-bill" data-bill-id="${b.id}" title="Edit Bill">
+                      ${getIcon('edit', 14)}
+                    </button>
+                    <button class="btn-icon-subtle btn-delete-bill" data-bill-id="${b.id}" title="Delete Bill">
+                      ${getIcon('trash', 14)}
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
 
-      <div class="destructive-zone">
-        <button class="ios-btn ios-btn-danger" id="btn-reset-database">
-          ${getIcon('trash', 16)} Reset All Application Data
-        </button>
-      </div>
-    </div>
+        <!-- Categories Manager -->
+        <div class="ios-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Expense & Income Categories</h3>
+              <span class="card-subtitle">${categories.filter(c => !c.isArchived).length} Active Categories</span>
+            </div>
+            <button class="ios-btn-compact" id="btn-add-custom-cat">
+              ${getIcon('plus', 14)} New Category
+            </button>
+          </div>
 
-    <!-- PWA Installation Guide -->
-    <div class="ios-card install-guide-card">
-      <div class="card-section-header">
-        <div>
-          <h3 class="card-title">Install FinanceiT as PWA</h3>
-          <span class="card-subtitle">Use like a native app with offline support</span>
+          <div class="categories-scroll-list">
+            ${categories.map(c => `
+              <div class="category-pill-item ${c.isArchived ? 'archived' : ''}">
+                <span class="cat-pill-icon">${getIcon(c.icon || 'tag', 14)}</span>
+                <span class="cat-pill-name">${escapeHtml(c.name)}</span>
+                ${c.isTransfer ? `<span class="badge-mini">Transfer</span>` : ''}
+                <button class="btn-archive-cat" data-cat-id="${c.id}" title="${c.isArchived ? 'Restore' : 'Archive'}">
+                  ${c.isArchived ? getIcon('repeat', 12) : getIcon('close', 12)}
+                </button>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
 
-      <div class="install-platform-box">
-        <h4>${getIcon('phone', 16)} iPhone (Safari)</h4>
-        <ol class="install-steps">
-          <li>Open this site in <strong>Apple Safari</strong> on your iPhone.</li>
-          <li>Tap the <strong>Share</strong> button (the square with an arrow pointing upward) at the bottom toolbar.</li>
-          <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
-          <li>Tap <strong>Add</strong> at the top right. FinanceiT will appear on your home screen.</li>
-        </ol>
-      </div>
+      <div class="settings-full-width">
+        <!-- Data Safety, Backup & Restore -->
+        <div class="ios-card data-safety-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Data Backup & Restore</h3>
+              <span class="card-subtitle">Keep your financial records safe</span>
+            </div>
+          </div>
 
-      <div class="install-platform-box">
-        <h4>${getIcon('phone', 16)} Android (Chrome)</h4>
-        <ol class="install-steps">
-          <li>Open this site in <strong>Google Chrome</strong>.</li>
-          <li>Tap the three vertical dots menu in the top-right corner.</li>
-          <li>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</li>
-          <li>Confirm by tapping <strong>Install</strong>.</li>
-        </ol>
+          <div class="data-safety-warning">
+            ${getIcon('alertCircle', 16)}
+            <p>
+              Your data lives exclusively in this browser's IndexedDB. Clearing website storage or resetting your browser will erase your data. <strong>Export regular JSON backups to preserve your history.</strong>
+            </p>
+          </div>
+
+          <div class="backup-actions-grid">
+            <button class="ios-btn ios-btn-secondary" id="btn-export-json">
+              ${getIcon('download', 16)} Export JSON Backup
+            </button>
+            <button class="ios-btn ios-btn-secondary" id="btn-export-csv">
+              ${getIcon('download', 16)} Export CSV (Excel)
+            </button>
+            <button class="ios-btn ios-btn-secondary" id="btn-trigger-import-json">
+              ${getIcon('upload', 16)} Import JSON Backup
+            </button>
+            <input type="file" id="json-file-input" accept=".json" style="display:none;" />
+          </div>
+
+          <div class="destructive-zone">
+            <button class="ios-btn ios-btn-danger" id="btn-reset-database">
+              ${getIcon('trash', 16)} Reset All Application Data
+            </button>
+          </div>
+        </div>
+
+        <!-- PWA Installation Guide -->
+        <div class="ios-card install-guide-card">
+          <div class="card-section-header">
+            <div>
+              <h3 class="card-title">Install FinanceiT as PWA</h3>
+              <span class="card-subtitle">Use like a native app with offline support</span>
+            </div>
+          </div>
+
+          <div class="install-platform-box">
+            <h4>${getIcon('phone', 16)} iPhone (Safari)</h4>
+            <ol class="install-steps">
+              <li>Open this site in <strong>Apple Safari</strong> on your iPhone.</li>
+              <li>Tap the <strong>Share</strong> button (the square with an arrow pointing upward) at the bottom toolbar.</li>
+              <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+              <li>Tap <strong>Add</strong> at the top right. FinanceiT will appear on your home screen.</li>
+            </ol>
+          </div>
+
+          <div class="install-platform-box">
+            <h4>${getIcon('phone', 16)} Android (Chrome)</h4>
+            <ol class="install-steps">
+              <li>Open this site in <strong>Google Chrome</strong>.</li>
+              <li>Tap the three vertical dots menu in the top-right corner.</li>
+              <li>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</li>
+              <li>Confirm by tapping <strong>Install</strong>.</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -235,6 +289,27 @@ function getOrdinal(n) {
 }
 
 function attachSettingsEvents() {
+  // Font Size Selection
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const size = e.currentTarget.getAttribute('data-size');
+      applyFontSize(size);
+      showToast(`Font size updated to ${size}`, 'info', 1500);
+    });
+  });
+
+  // Theme Mode Selection
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const theme = e.currentTarget.getAttribute('data-theme');
+      applyTheme(theme);
+      document.querySelectorAll('.theme-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-theme') === theme);
+      });
+      showToast(`Theme updated to ${theme}`, 'info', 1500);
+    });
+  });
+
   // Edit Salary Config
   const btnEditSalary = document.getElementById('btn-edit-salary-config');
   if (btnEditSalary) {

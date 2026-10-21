@@ -77,48 +77,50 @@ export function renderReports() {
       </div>
     </div>
 
-    <!-- Spending by Category SVG Donut Chart -->
-    <div class="ios-card chart-card">
-      <div class="card-section-header">
-        <h3 class="card-title">Spending by Category</h3>
-        <span class="card-counter">${formatPHP(totalExpenses)} Total</span>
-      </div>
-
-      ${rankedCategories.length === 0 ? `
-        <div class="empty-chart-notice">No expense transactions recorded in ${formatMonthLabel(currentPeriod)}.</div>
-      ` : `
-        <div class="donut-chart-wrapper">
-          <div class="donut-svg-container">
-            ${renderDonutSvg(rankedCategories, totalExpenses)}
-          </div>
-          <div class="donut-legend-col">
-            ${rankedCategories.slice(0, 5).map((item, idx) => `
-              <div class="legend-row">
-                <span class="legend-color-dot shade-${idx}"></span>
-                <span class="legend-name">${escapeHtml(item.cat.name)}</span>
-                <span class="legend-pct">${Math.round(item.percent)}%</span>
-                <span class="legend-amt">${formatPHP(item.amountCentavos)}</span>
-              </div>
-            `).join('')}
-          </div>
+    <div class="reports-charts-grid">
+      <!-- Spending by Category SVG Donut Chart -->
+      <div class="ios-card chart-card">
+        <div class="card-section-header">
+          <h3 class="card-title">Spending by Category</h3>
+          <span class="card-counter">${formatPHP(totalExpenses)} Total</span>
         </div>
-      `}
-    </div>
 
-    <!-- Monthly Trend Comparison (Last 4 Months) -->
-    <div class="ios-card chart-card">
-      <div class="card-section-header">
-        <h3 class="card-title">Monthly Cashflow Trend</h3>
-        <span class="card-subtitle">Last 4 Months</span>
+        ${rankedCategories.length === 0 ? `
+          <div class="empty-chart-notice">No expense transactions recorded in ${formatMonthLabel(currentPeriod)}.</div>
+        ` : `
+          <div class="donut-chart-wrapper">
+            <div class="donut-svg-container">
+              ${renderDonutSvg(rankedCategories, totalExpenses)}
+            </div>
+            <div class="donut-legend-col">
+              ${rankedCategories.slice(0, 5).map((item, idx) => `
+                <div class="legend-row">
+                  <span class="legend-color-dot shade-${idx}"></span>
+                  <span class="legend-name">${escapeHtml(item.cat.name)}</span>
+                  <span class="legend-pct">${Math.round(item.percent)}%</span>
+                  <span class="legend-amt">${formatPHP(item.amountCentavos)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `}
       </div>
 
-      <div class="trend-bars-container">
-        ${renderTrendBarsSvg(trends)}
-      </div>
+      <!-- Monthly Trend Comparison (Last 4 Months) -->
+      <div class="ios-card chart-card">
+        <div class="card-section-header">
+          <h3 class="card-title">Monthly Cashflow Trend</h3>
+          <span class="card-subtitle">Last 4 Months</span>
+        </div>
 
-      <div class="trend-legend">
-        <span class="trend-legend-item"><span class="bar-color-key key-income"></span> Income</span>
-        <span class="trend-legend-item"><span class="bar-color-key key-expense"></span> Expense</span>
+        <div class="trend-bars-container">
+          ${renderTrendBarsSvg(trends)}
+        </div>
+
+        <div class="trend-legend">
+          <span class="trend-legend-item"><span class="bar-color-key key-income"></span> Income</span>
+          <span class="trend-legend-item"><span class="bar-color-key key-expense"></span> Expense</span>
+        </div>
       </div>
     </div>
 
